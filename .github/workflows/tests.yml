@@ -1,0 +1,56 @@
+---
+name: "tests"
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.bash"
+      - "**/*.bats"
+      - "**/*.nix"
+
+  pull_request:
+    paths:
+      - "**/*.bash"
+      - "**/*.bats"
+      - "**/*.nix"
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flake:
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: "checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "setup nix on the runner"
+        uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |-
+            system-features = nixos-test benchmark big-parallel kvm
+
+      - name: "evaluation flake packages derivations"
+        run: |-
+          nix eval --json \
+          --impure \
+          --expr '(builtins.getFlake (builtins.toString ./.)).outputs.packages'
+        # ^ we need the --impure flag to be able to get the flake
+
+  pre-commit:
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: "checkout project"
+        uses: actions/checkout@v3
+
+      - name: "setup nix on the runner"
+        uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |-
+            system-features = nixos-test benchmark big-parallel kvm
+
+      - name: "run pre-commit checks"
+        run: |-
+          export TERM=xterm-256color
+          nix develop --accept-flake-config -c make pre-commit
