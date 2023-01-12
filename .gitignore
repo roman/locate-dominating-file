@@ -3,6 +3,7 @@
 *.log
 tmp/
 
+result
 .devenv
 .direnv
 .pre-commit-config.yaml

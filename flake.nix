@@ -22,6 +22,11 @@
     devenv,
     ...
   } @ inputs: {
+    packages = flake-utils.lib.eachDefaultSystemMap (system: let
+      pkgs = import nixpkgs {inherit system;};
+    in {
+      default = pkgs.callPackage ./default.nix {};
+    });
     devShells = flake-utils.lib.eachDefaultSystemMap (system: let
       pkgs = import nixpkgs {inherit system;};
     in {
