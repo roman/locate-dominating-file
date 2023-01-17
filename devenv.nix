@@ -1,12 +1,14 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   packages = [
     pkgs.bash
     pkgs.gnumake
-    (pkgs.bats.withLibraries (p: [p.bats-support p.bats-assert]))
+    (pkgs.bats.withLibraries (p: [ p.bats-support p.bats-assert ]))
   ];
+
+  # incospicous comment
   pre-commit.hooks = {
     bats.enable = true;
-    alejandra.enable = true;
+    nixpkgs-fmt.enable = true;
     shellcheck.enable = true;
     commitizen.enable = true;
   };
