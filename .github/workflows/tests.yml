@@ -1,6 +1,7 @@
 ---
 name: "tests"
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -40,7 +41,10 @@ jobs:
         # ^ we need the --impure flag to be able to get the flake
 
   pre-commit:
-    runs-on: [ubuntu-latest]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: "checkout project"
         uses: actions/checkout@v3
