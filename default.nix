@@ -1,19 +1,17 @@
 { bats
 , bash
 , lib
-, stdenvNoCC
+, resholve
+, coreutils
 , getopt
-,
 }:
 let
   version = "0.0.1";
 in
-stdenvNoCC.mkDerivation {
+resholve.mkDerivation {
   pname = "locate-dominating-file";
   inherit version;
   src = ./.;
-
-  doCheck = true;
 
   postPatch = ''
     for file in $(find src tests -type f); do
@@ -21,7 +19,7 @@ stdenvNoCC.mkDerivation {
     done
   '';
 
-  buildInputs = [ getopt ];
+  buildInputs = [ getopt coreutils ];
 
   installPhase = ''
     runHook preInstall
@@ -34,6 +32,8 @@ stdenvNoCC.mkDerivation {
 
   checkInputs = [ (bats.withLibraries (p: [ p.bats-support p.bats-assert ])) ];
 
+  doCheck = true;
+
   checkPhase = ''
     runHook preCheck
 
@@ -41,6 +41,15 @@ stdenvNoCC.mkDerivation {
 
     runHook postCheck
   '';
+
+  solutions.default = {
+    scripts = [ "bin/locate-dominating-file" ];
+    interpreter = "${bash}/bin/bash";
+    inputs = [
+      coreutils
+      getopt
+    ];
+  };
 
   meta = with lib; {
     description = "Program that looks up in a directory hierarchy for a given filename";

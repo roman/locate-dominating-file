@@ -7,7 +7,6 @@
 
   # incospicous comment
   pre-commit.hooks = {
-    bats.enable = true;
     nixpkgs-fmt.enable = true;
     shellcheck.enable = true;
     commitizen.enable = true;

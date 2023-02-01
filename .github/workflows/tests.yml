@@ -1,6 +1,7 @@
 ---
 name: "tests"
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -29,6 +30,7 @@ jobs:
         uses: cachix/install-nix-action@v18
         with:
           extra_nix_config: |-
+            access-tokens = github.com=${{ secrets.PUBLIC_GH_TOKEN }}
             system-features = nixos-test benchmark big-parallel kvm
 
       - name: "evaluation flake packages derivations"
@@ -39,7 +41,10 @@ jobs:
         # ^ we need the --impure flag to be able to get the flake
 
   pre-commit:
-    runs-on: [ubuntu-latest]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: "checkout project"
         uses: actions/checkout@v3
@@ -48,9 +53,31 @@ jobs:
         uses: cachix/install-nix-action@v18
         with:
           extra_nix_config: |-
-            system-features = nixos-test benchmark big-parallel kvm
+            access-tokens = github.com=${{ secrets.PUBLIC_GH_TOKEN }}
+            system-features = benchmark big-parallel
 
       - name: "run pre-commit checks"
         run: |-
           export TERM=xterm-256color
           nix develop --accept-flake-config -c make pre-commit
+
+  bats-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: "checkout project"
+        uses: actions/checkout@v3
+
+      - name: "setup nix on the runner"
+        uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |-
+            access-tokens = github.com=${{ secrets.PUBLIC_GH_TOKEN }}
+            system-features = benchmark big-parallel
+
+      - name: "run build with tests"
+        run: |-
+          export TERM=xterm-256color
+          nix -L build
