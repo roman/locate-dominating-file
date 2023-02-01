@@ -56,3 +56,24 @@ jobs:
         run: |-
           export TERM=xterm-256color
           nix develop --accept-flake-config -c make pre-commit
+
+  bats-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: "checkout project"
+        uses: actions/checkout@v3
+
+      - name: "setup nix on the runner"
+        uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |-
+            access-tokens = github.com=${{ secrets.PUBLIC_GH_TOKEN }}
+            system-features = benchmark big-parallel
+
+      - name: "run build with tests"
+        run: |-
+          export TERM=xterm-256color
+          nix -L build
