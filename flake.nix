@@ -10,7 +10,7 @@
 
     devenv = {
       url = "github:cachix/devenv/latest";
-      inputs.pre-commit-hooks.url = "github:roman/pre-commit-hooks.nix/roman/checker/bats-support";
+      inputs.pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
       inputs.pre-commit-hooks.inputs.nixpkgs.follows = "devenv/nixpkgs";
     };
   };
